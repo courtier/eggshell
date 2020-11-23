@@ -1,13 +1,15 @@
-## Eggshell - Lightweight (and probably brittle) JSON based database
+## Eggshell [![GoDoc](https://godoc.org/github.com/courtier/eggshell?status.svg)](https://godoc.org/github.com/courtier/eggshell) [![Go Report Card](https://goreportcard.com/badge/github.com/courtier/eggshell)](https://goreportcard.com/report/github.com/courtier/eggshell)
+
+### Lightweight (and probably brittle) JSON based database
 
 Inspired by scribble, aims to be better than it, at least for my usages
 
 ### To-Do (in order of priority):
-- [ ] Insert document
-- [ ] Read all documents matching a parameter
+- [X] Insert document
+- [X] Read all documents in collection
 - [ ] Delete collection
 - [ ] Read document matching a parameter
-- [ ] Read all documents in collection
+- [ ] Read all documents matching a parameter
 - [ ] Delete document matching a parameter
 - [ ] Delete all documents matching a parameter
 - [ ] Edit document matching a parameter

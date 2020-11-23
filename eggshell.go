@@ -1,21 +1,24 @@
-//Package eggshell lightweight, document based database
+//Package eggshell is lightweight, document based database
 package eggshell
 
 import (
+	"bufio"
 	"encoding/json"
 	"errors"
+	"io/ioutil"
 	"os"
 	"path/filepath"
+	"strings"
 	"sync"
 )
 
 var breakLineBytes []byte = []byte("\n")
 
-//Driver provides basic catapabilities required to handle a database,
+//Driver provides basic catapabilities required to handle a database
 type Driver struct {
 	mutex   sync.Mutex
 	mutexes map[string]*sync.Mutex
-	path    string
+	Path    string //path which the driver uses to store database files
 }
 
 //CreateDriver creates a new driver that uses the path specified as the database's main directory
@@ -29,14 +32,20 @@ func CreateDriver(path string) (*Driver, error) {
 		returnError = errors.New("path exists, but is not directory")
 	}
 	driver := Driver{
-		path:    path,
+		Path:    path,
 		mutexes: make(map[string]*sync.Mutex)}
 	return &driver, returnError
 }
 
-//InsertDocument inserts document into a collection
-func InsertDocument(db *Driver, collection string, document interface{}) error {
-	collectionPath := appendFilePath(db.path, collection+".json")
+//InsertDocument inserts document into a collection, given a collection name
+//document needs to be a struct which can be marshaled by the json package
+func (db *Driver) InsertDocument(collection string, document interface{}) error {
+	collectionPath := appendFilePath(db.Path, collection+".json")
+
+	mutex := db.getOrCreateMutex(collection)
+	mutex.Lock()
+	defer mutex.Unlock()
+
 	f, err := os.OpenFile(collectionPath,
 		os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0777)
 	if err != nil {
@@ -54,10 +63,66 @@ func InsertDocument(db *Driver, collection string, document interface{}) error {
 	return nil
 }
 
+//ReadAll reads all documents in a collection
+func (db *Driver) ReadAll(collection string) (documents []string, err error) {
+	collectionPath := appendFilePath(db.Path, collection+".json")
+	collectionFile, err := os.OpenFile(collectionPath, os.O_RDONLY, 0777)
+	if err != nil {
+		return nil, err
+	}
+	defer collectionFile.Close()
+
+	rawDocuments := []string{}
+
+	scanner := bufio.NewScanner(collectionFile)
+	for scanner.Scan() {
+		rawDocuments = append(rawDocuments, scanner.Text())
+	}
+
+	return rawDocuments, nil
+
+}
+
+//GetAllCollections gets all collections stored in the database
+func (db *Driver) GetAllCollections() []string {
+
+	collectionList := []string{}
+
+	files, err := ioutil.ReadDir(db.Path)
+	if err != nil {
+		return nil
+	}
+	for _, file := range files {
+		if strings.HasSuffix(file.Name(), ".json") {
+
+		}
+	}
+
+	return collectionList
+
+}
+
 func appendFilePath(filepath, appendation string) string {
 	return cleanFilePath(filepath + "/" + appendation)
 }
 
 func cleanFilePath(filePath string) string {
 	return filepath.FromSlash(filePath)
+}
+
+//thank you sdomino/scribble for this function, it will stay until a better solution is required
+func (db *Driver) getOrCreateMutex(collection string) *sync.Mutex {
+
+	db.mutex.Lock()
+	defer db.mutex.Unlock()
+
+	m, ok := db.mutexes[collection]
+
+	// if the mutex doesn't exist make it
+	if !ok {
+		m = &sync.Mutex{}
+		db.mutexes[collection] = m
+	}
+
+	return m
 }
