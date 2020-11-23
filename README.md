@@ -7,8 +7,8 @@ Inspired by scribble, aims to be better than it, at least for my usages
 ### To-Do (in order of priority):
 - [X] Insert document
 - [X] Read all documents in collection
-- [ ] Delete collection
-- [ ] Read document matching a parameter
+- [X] Delete collection
+- [X] Read document matching a parameter
 - [ ] Read all documents matching a parameter
 - [ ] Delete document matching a parameter
 - [ ] Delete all documents matching a parameter

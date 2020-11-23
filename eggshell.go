@@ -83,6 +83,31 @@ func (db *Driver) ReadAll(collection string) (documents []string, err error) {
 
 }
 
+//ReadFiltered reads documents that contain the given filter in a collection
+//filter should be in json format without any spaces: uuid\":\"1231-fwg3-13f2\"
+//not that the filter is case sensitive
+func (db *Driver) ReadFiltered(collection string, filter string) (documents []string, err error) {
+	collectionPath := appendFilePath(db.Path, collection+".json")
+	collectionFile, err := os.OpenFile(collectionPath, os.O_RDONLY, 0777)
+	if err != nil {
+		return nil, err
+	}
+	defer collectionFile.Close()
+
+	rawDocuments := []string{}
+
+	scanner := bufio.NewScanner(collectionFile)
+	for scanner.Scan() {
+		line := scanner.Text()
+		if strings.Contains(line, filter) {
+			rawDocuments = append(rawDocuments, scanner.Text())
+		}
+	}
+
+	return rawDocuments, nil
+
+}
+
 //GetAllCollections gets all collections stored in the database
 func (db *Driver) GetAllCollections() []string {
 
@@ -99,6 +124,21 @@ func (db *Driver) GetAllCollections() []string {
 	}
 
 	return collectionList
+
+}
+
+//DeleteCollection removes a collection from the database
+func (db *Driver) DeleteCollection(collection string) error {
+
+	collectionPath := appendFilePath(db.Path, collection+".json")
+	return os.Remove(collectionPath)
+
+}
+
+//GetCollectionPath get the path of a collection
+func (db *Driver) GetCollectionPath(collection string) string {
+
+	return appendFilePath(db.Path, collection+".json")
 
 }
 

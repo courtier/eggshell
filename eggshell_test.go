@@ -47,6 +47,38 @@ func TestInsertAndRead(t *testing.T) {
 	}
 }
 
+func TestInsertAndReadFiltered(t *testing.T) {
+	db, _ := createDriver()
+	documents, err := db.ReadFiltered("cats", "Age\":5")
+	if err != nil {
+		t.Error("expected no error while reading all, got: ", err)
+	}
+	for _, document := range documents {
+		expectedCat := Cat{"topak", 5}
+		parsedDoc := Cat{}
+		if err := json.Unmarshal([]byte(document), &parsedDoc); err != nil {
+			t.Error("expected no error while unmarshaling, got: ", err)
+		}
+		if parsedDoc != expectedCat {
+			t.Error("expected parsed cat to be the same as default cat")
+		}
+	}
+}
+
+func TestCollectionDelete(t *testing.T) {
+	db, _ := createDriver()
+	cat := Cat{"topak", 5}
+	err := db.InsertDocument("tempcats", cat)
+	if err != nil {
+		t.Error("expected no error while inserting document, got: ", err)
+	}
+	db.DeleteCollection("tempcats")
+	_, err = os.Stat(db.GetCollectionPath("tempcats"))
+	if err == nil {
+		t.Error("tempcats folder should have been deleted but is not")
+	}
+}
+
 func createDriver() (db *Driver, err error) {
 	path := "testdb"
 	fDb, fErr := CreateDriver(path)
