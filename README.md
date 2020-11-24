@@ -9,7 +9,7 @@ Inspired by scribble, aims to be better than it, at least for my usages
 - [X] Read all documents in collection
 - [X] Delete collection
 - [X] Read all documents matching a parameter
-- [ ] Delete all documents matching a parameter
+- [X] Delete all documents matching a parameter
 - [ ] Edit document matching a parameter
 - [ ] Edit all documents matching a parameter
 - [ ] Encryption (will slow down the processes)
