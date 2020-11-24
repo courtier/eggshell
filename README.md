@@ -11,11 +11,10 @@ Inspired by scribble, aims to be better than it, at least for my usages
 - [X] Delete collection
 - [X] Read all documents matching a parameter
 - [X] Delete all documents matching a parameter
-- [ ] Edit document matching a parameter
-- [ ] Edit all documents matching a parameter
+- [ ] Edit document
 - [ ] Encryption (will slow down the processes)
-- [ ] Indexing using Snowflake IDs
-- [ ] Logging
+- [ ] Indexing using Snowflake IDs (sorted)
+- [ ] Logging?
 
 ### Features:
 - [X] Supports windows (i think)
