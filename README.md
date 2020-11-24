@@ -1,4 +1,5 @@
-## Eggshell [![GoDoc](https://godoc.org/github.com/courtier/eggshell?status.svg)](https://godoc.org/github.com/courtier/eggshell) [![Go Report Card](https://goreportcard.com/badge/github.com/courtier/eggshell)](https://goreportcard.com/report/github.com/courtier/eggshell)
+## Eggshell [![GoDoc](https://godoc.org/github.com/courtier/eggshell?status.svg)](https://godoc.org/github.com/courtier/eggshell) [![Go Report Card](https://goreportcard.com/badge/github.com/courtier/eggshell)](https://goreportcard.com/report/github.com/courtier/eggshell) [![Eggshell](https://circleci.com/gh/courtier/eggshell.svg?style=svg)](https://circleci.com/gh/courtier/eggshell)
+
 
 ### Lightweight (and probably brittle) JSON based database
 
