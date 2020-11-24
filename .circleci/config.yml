@@ -4,7 +4,6 @@
 version: 2
 jobs:
   build:
-    executor: win/default # executor type
     docker:
       # specify the version
       - image: circleci/golang:1.9
