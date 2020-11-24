@@ -167,7 +167,7 @@ func (db *Driver) GetAllCollections() []string {
 	}
 	for _, file := range files {
 		if strings.HasSuffix(file.Name(), ".json") {
-			collectionName := strings.ReplaceAll(file.Name(), ".json", "")
+			collectionName := strings.Replace(file.Name(), ".json", "", 1)
 			collectionList = append(collectionList, collectionName)
 		}
 	}
