@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"sync"
 )
@@ -57,7 +58,7 @@ func (db *Driver) InsertDocument(collection string, document interface{}) error 
 		return err
 	}
 	contentToWrite = append(contentToWrite, breakLineBytes...)
-	if _, err := f.Write(contentToWrite); err != nil {
+	if err := writeToFile(f, contentToWrite); err != nil {
 		return err
 	}
 	return nil
@@ -83,10 +84,9 @@ func (db *Driver) ReadAll(collection string) (documents []string, err error) {
 
 }
 
-//ReadFiltered reads documents that contain the given filter in a collection
-//filter should be in json format without any spaces: uuid\":\"1231-fwg3-13f2\"
-//not that the filter is case sensitive
-func (db *Driver) ReadFiltered(collection string, filter string) (documents []string, err error) {
+//ReadFiltered reads documents that match the given filter in a collection
+//note that the filter is case sensitive
+func (db *Driver) ReadFiltered(collection string, filterKey, filterValue string) (documents []string, err error) {
 	collectionPath := appendFilePath(db.Path, collection+".json")
 	collectionFile, err := os.OpenFile(collectionPath, os.O_RDONLY, 0777)
 	if err != nil {
@@ -94,17 +94,65 @@ func (db *Driver) ReadFiltered(collection string, filter string) (documents []st
 	}
 	defer collectionFile.Close()
 
+	regex, _ := regexp.Compile("(" + filterKey + ")\"?:\"?(" + filterValue + ")")
+
 	rawDocuments := []string{}
 
 	scanner := bufio.NewScanner(collectionFile)
 	for scanner.Scan() {
 		line := scanner.Text()
-		if strings.Contains(line, filter) {
+		if regex.MatchString(line) {
 			rawDocuments = append(rawDocuments, scanner.Text())
 		}
 	}
 
 	return rawDocuments, nil
+
+}
+
+//DeleteFiltered deletes documents that match the given filter in a collection
+//note that the filter is case sensitive
+func (db *Driver) DeleteFiltered(collection string, filterKey, filterValue string) error {
+	collectionPath := appendFilePath(db.Path, collection+".json")
+	collectionFile, err := os.OpenFile(collectionPath, os.O_RDWR, 0777)
+	if err != nil {
+		return err
+	}
+
+	regex, _ := regexp.Compile("(" + filterKey + ")\"?:\"?(" + filterValue + ")")
+
+	rawDocuments := []string{}
+
+	scanner := bufio.NewScanner(collectionFile)
+	for scanner.Scan() {
+		line := scanner.Text()
+		if !regex.MatchString(line) {
+			rawDocuments = append(rawDocuments, scanner.Text())
+		}
+	}
+
+	collectionFile.Close()
+
+	err = os.Remove(collectionPath)
+
+	collectionFile, err = os.OpenFile(collectionPath,
+		os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0777)
+	if err != nil {
+		return err
+	}
+	defer collectionFile.Close()
+
+	if err != nil {
+		return err
+	}
+
+	for _, document := range rawDocuments {
+		if err := writeToFile(collectionFile, []byte(document)); err != nil {
+			return err
+		}
+	}
+
+	return nil
 
 }
 
@@ -119,7 +167,8 @@ func (db *Driver) GetAllCollections() []string {
 	}
 	for _, file := range files {
 		if strings.HasSuffix(file.Name(), ".json") {
-
+			collectionName := strings.ReplaceAll(file.Name(), ".json", "")
+			collectionList = append(collectionList, collectionName)
 		}
 	}
 
@@ -140,6 +189,13 @@ func (db *Driver) GetCollectionPath(collection string) string {
 
 	return appendFilePath(db.Path, collection+".json")
 
+}
+
+func writeToFile(file *os.File, content []byte) error {
+	if _, err := file.Write(content); err != nil {
+		return err
+	}
+	return nil
 }
 
 func appendFilePath(filepath, appendation string) string {
