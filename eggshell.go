@@ -64,6 +64,36 @@ func (db *Driver) InsertDocument(collection string, document interface{}) error 
 	return nil
 }
 
+//InsertAllDocuments inserts all documents in the array into a collection, given a collection name
+//documents needs to be an array of type interface and not a struct
+func (db *Driver) InsertAllDocuments(collection string, documents []interface{}) error {
+	collectionPath := appendFilePath(db.Path, collection+".json")
+
+	mutex := db.getOrCreateMutex(collection)
+	mutex.Lock()
+	defer mutex.Unlock()
+
+	f, err := os.OpenFile(collectionPath,
+		os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0777)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+	var contentToWrite []byte
+	for _, document := range documents {
+		marshaledDocument, err := json.Marshal(document)
+		if err != nil {
+			return err
+		}
+		marshaledDocument = append(marshaledDocument, breakLineBytes...)
+		contentToWrite = append(contentToWrite, marshaledDocument...)
+	}
+	if err := writeToFile(f, contentToWrite); err != nil {
+		return err
+	}
+	return nil
+}
+
 //ReadAll reads all documents in a collection
 func (db *Driver) ReadAll(collection string) (documents []string, err error) {
 	collectionPath := appendFilePath(db.Path, collection+".json")

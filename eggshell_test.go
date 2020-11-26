@@ -118,6 +118,33 @@ func TestDeleteFiltered(t *testing.T) {
 	}
 }
 
+func TestInsertAll(t *testing.T) {
+	db, _ := createDriver()
+	var cats []interface{}
+	for i := 0; i < 10; i++ {
+		cat := Cat{"topak", i}
+		cats = append(cats, cat)
+	}
+	err := db.InsertAllDocuments("allcats", cats)
+	if err != nil {
+		t.Error("expected no error while inserting document, got: ", err)
+	}
+	documents, err := db.ReadAll("allcats")
+	if err != nil {
+		t.Error("expected no error while reading all, got: ", err)
+	}
+	for i, document := range documents {
+		parsedDoc := Cat{}
+		if err := json.Unmarshal([]byte(document), &parsedDoc); err != nil {
+			t.Error("expected no error while unmarshaling, got: ", err)
+		}
+		cat := Cat{"topak", i}
+		if parsedDoc != cat {
+			t.Error("expected parsed cat to be the same as default cat")
+		}
+	}
+}
+
 func createDriver() (db *Driver, err error) {
 	path := "testdb"
 	fDb, fErr := CreateDriver(path)
