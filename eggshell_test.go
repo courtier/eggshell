@@ -52,7 +52,7 @@ func TestInsertAndRead(t *testing.T) {
 
 func TestInsertAndReadFiltered(t *testing.T) {
 	db, _ := createDriver()
-	documents, err := db.ReadFiltered("cats", "Age", "5")
+	documents, err := db.ReadFiltered("cats", []string{"Age"}, []string{"5"})
 	if err != nil {
 		t.Error("expected no error while reading all, got: ", err)
 	}
@@ -112,7 +112,7 @@ func TestDeleteFiltered(t *testing.T) {
 	if err != nil {
 		t.Error("expected no error while inserting document, got: ", err)
 	}
-	err = db.DeleteFiltered("deletefilter", "Age", "167")
+	err = db.DeleteFiltered("deletefilter", []string{"Age"}, []string{"167"})
 	if err != nil {
 		t.Error("expected no error while deleting by filter, got: ", err)
 	}

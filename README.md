@@ -11,6 +11,7 @@ Inspired by scribble, aims to be better than it, at least for my usages
 - [X] Delete collection
 - [X] Read all documents matching a parameter
 - [X] Delete all documents matching a parameter
+- [X] Insert all documents in an array so as to improve performance by not opening the file for each document
 - [ ] Edit document
 - [ ] Encryption (will slow down the processes)
 - [ ] Indexing using Snowflake IDs (sorted)

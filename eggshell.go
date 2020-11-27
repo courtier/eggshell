@@ -116,7 +116,7 @@ func (db *Driver) ReadAll(collection string) (documents []string, err error) {
 
 //ReadFiltered reads documents that match the given filter in a collection
 //note that the filter is case sensitive
-func (db *Driver) ReadFiltered(collection string, filterKey, filterValue string) (documents []string, err error) {
+func (db *Driver) ReadFiltered(collection string, filterKeys, filterValues []string) (documents []string, err error) {
 	collectionPath := appendFilePath(db.Path, collection+".json")
 	collectionFile, err := os.OpenFile(collectionPath, os.O_RDONLY, 0777)
 	if err != nil {
@@ -124,14 +124,19 @@ func (db *Driver) ReadFiltered(collection string, filterKey, filterValue string)
 	}
 	defer collectionFile.Close()
 
-	regex, _ := regexp.Compile("(" + filterKey + ")\"?:\"?(" + filterValue + ")")
-
 	rawDocuments := []string{}
 
 	scanner := bufio.NewScanner(collectionFile)
 	for scanner.Scan() {
 		line := scanner.Text()
-		if regex.MatchString(line) {
+		matches := 0
+		for index, filterKey := range filterKeys {
+			regex, _ := regexp.Compile("(" + filterKey + ")\"?:\"?(" + filterValues[index] + ")")
+			if regex.MatchString(line) {
+				matches++
+			}
+		}
+		if matches == len(filterKeys) {
 			rawDocuments = append(rawDocuments, scanner.Text())
 		}
 	}
@@ -142,21 +147,26 @@ func (db *Driver) ReadFiltered(collection string, filterKey, filterValue string)
 
 //DeleteFiltered deletes documents that match the given filter in a collection
 //note that the filter is case sensitive
-func (db *Driver) DeleteFiltered(collection string, filterKey, filterValue string) error {
+func (db *Driver) DeleteFiltered(collection string, filterKeys, filterValues []string) error {
 	collectionPath := appendFilePath(db.Path, collection+".json")
 	collectionFile, err := os.OpenFile(collectionPath, os.O_RDWR, 0777)
 	if err != nil {
 		return err
 	}
 
-	regex, _ := regexp.Compile("(" + filterKey + ")\"?:\"?(" + filterValue + ")")
-
 	rawDocuments := []string{}
 
 	scanner := bufio.NewScanner(collectionFile)
 	for scanner.Scan() {
 		line := scanner.Text()
-		if !regex.MatchString(line) {
+		matches := 0
+		for index, filterKey := range filterKeys {
+			regex, _ := regexp.Compile("(" + filterKey + ")\"?:\"?(" + filterValues[index] + ")")
+			if regex.MatchString(line) {
+				matches++
+			}
+		}
+		if matches != len(filterKeys) {
 			rawDocuments = append(rawDocuments, scanner.Text())
 		}
 	}
