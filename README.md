@@ -19,3 +19,6 @@ Inspired by scribble, aims to be better than it, at least for my usages
 
 ### Features:
 - [X] Supports windows (i think)
+
+### Changelog:
+- Added filtering by multiple keys and values
