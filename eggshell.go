@@ -154,6 +154,10 @@ func (db *Driver) DeleteFiltered(collection string, filterKeys, filterValues []s
 		return err
 	}
 
+	mutex := db.getOrCreateMutex(collection)
+	mutex.Lock()
+	defer mutex.Unlock()
+
 	rawDocuments := []string{}
 
 	scanner := bufio.NewScanner(collectionFile)
@@ -218,6 +222,10 @@ func (db *Driver) GetAllCollections() []string {
 
 //DeleteCollection removes a collection from the database
 func (db *Driver) DeleteCollection(collection string) error {
+
+	mutex := db.getOrCreateMutex(collection)
+	mutex.Lock()
+	defer mutex.Unlock()
 
 	collectionPath := appendFilePath(db.Path, collection+".json")
 	return os.Remove(collectionPath)
