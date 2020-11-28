@@ -22,3 +22,4 @@ Inspired by scribble, aims to be better than it, at least for my usages
 
 ### Changelog:
 - Added filtering by multiple keys and values
+- Fixed couple thing
