@@ -191,7 +191,9 @@ func (db *Driver) DeleteFiltered(collection string, filterKeys, filterValues []s
 	}
 
 	for _, document := range rawDocuments {
-		if err := writeToFile(collectionFile, []byte(document)); err != nil {
+		insertDoc := []byte(document)
+		insertDoc = append(insertDoc, breakLineBytes...)
+		if err := writeToFile(collectionFile, insertDoc); err != nil {
 			return err
 		}
 	}
